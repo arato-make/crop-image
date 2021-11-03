@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cropper</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.2.4/cropper.min.css">
+</head>
+<body>
+  <!-- Content -->
+  <div class="container">
+    <h1 class="page-header">Use Cropper with CamanJS</h1>
+    <p id="upload">
+      <input id="file" type="file" multiple>
+    </p>
+    <p id="handle" style="display:none">
+      <!-- <button class="btn btn-primary text-center" id="brightness">Brightness</button>
+      <button class="btn btn-primary" id="contrast">Contrast</button> -->
+      比率：横 <input type="number" id="yoko" value='1' min='0'>
+      縦 <input type="number" id="tate" value="1" min='0'>
+      <button class="btn btn-primary" id="change">変更</button>
+      </br>
+      <button class="btn btn-primary" id="clip">切り抜き</button>
+      <button class="btn btn-primary" id="next">次へ</button>
+    </p>
+    <p id="canvas-area">
+      <canvas id="canvas" style="max-width:100%;"></canvas>
+    </p>
+  </div>
+
+  <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">確認</h5>
+        </div>
+        <div class="modal-body">
+          <img id="image" style="max-width:100%;">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <a class="btn btn-primary" id="save" download>保存</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/camanjs/4.1.2/caman.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.2.4/cropper.min.js"></script>
+  <script>
+    $(function () {
+      var URL = window.URL || window.webkitURL;
+      var $upload = $('#upload');
+      var $handle = $('#handle');
+      var $file = $('#file');
+      var files;
+      var $canvas = $('#canvas');
+      var caman;
+      var i = 0;
+      var tate = 1;
+      var yoko = 1;
+
+      function startCropper() {
+
+        // Destroy if already initialized
+        if ($canvas.data('cropper')) {
+          $canvas.cropper('destroy');
+        }
+
+        // Initialize a new cropper
+        $canvas.cropper({
+          aspectRatio: yoko/tate,
+          viewMode: 1
+        });
+      }
+
+      function startCaman(url) {
+        caman = Caman('#canvas', url, function () {
+          URL.revokeObjectURL(url);
+          //$upload.hide();
+          $handle.show();
+
+          startCropper();
+        });
+      }
+
+      $handle.hide();
+
+      if (URL) {
+        $file.change(function () {
+          files = this.files;
+          var file;
+
+          if (files && files.length) {
+            file = files[0];
+
+            if (/^image\/\w+$/.test(file.type)) {
+              if ($canvas.data('cropper')) {
+                $('#canvas-area').empty()
+                $image = $('<img/>', {'id': 'image',style: "max-width:100%;"})
+                $('#canvas-area').append($image);
+                $canvas = $('<canvas/>', {'id': 'canvas',style: "max-width:100%;"})
+                $('#canvas-area').append($canvas);
+              }
+
+              startCaman(URL.createObjectURL(file));
+            } else {
+              window.alert('Please choose an image file.');
+            }
+          }
+        });
+      } else {
+        $file.prop('disabled', true);
+      }
+
+      $('#brightness').on('click', function () {
+        if (caman) {
+          caman.brightness(2).render(startCropper);
+        }
+      });
+
+      $('#contrast').on('click', function () {
+        if (caman) {
+          caman.contrast(2).render(startCropper);
+        }
+      });
+
+      $('#change').on('click', function () {
+        tate = $('#tate').val();
+        yoko = $('#yoko').val();
+        startCropper()
+      });
+
+      $('#clip').on('click', function () {
+        $('#modal').modal('show')
+        $("#save").attr('href', $('canvas').cropper('getCroppedCanvas').toDataURL())
+        $("#image").attr('src', $('canvas').cropper('getCroppedCanvas').toDataURL())
+      });
+
+      $('#next').on('click', function() {
+          $("#save").attr('disabled', true);
+          $('#canvas-area').empty()
+          $image = $('<img/>', {'id': 'image',style: "max-width:100%;"})
+          $('#canvas-area').append($image);
+          $canvas = $('<canvas/>', {'id': 'canvas',style: "max-width:100%;"})
+          $('#canvas-area').append($canvas);
+          i++;
+          if (files && files.length && files[i]) {
+            file = files[i];
+
+            if (/^image\/\w+$/.test(file.type)) {
+              startCaman(URL.createObjectURL(file));
+            } else {
+              window.alert('Please choose an image file.');
+            }
+          }
+      });
+    });
+  </script>
+</body>
+</html>
