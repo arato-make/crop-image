@@ -105,8 +105,6 @@
             if (/^image\/\w+$/.test(file.type)) {
               if ($canvas.data('cropper')) {
                 $('#canvas-area').empty()
-                $image = $('<img/>', {'id': 'image',style: "max-width:100%;"})
-                $('#canvas-area').append($image);
                 $canvas = $('<canvas/>', {'id': 'canvas',style: "max-width:100%;"})
                 $('#canvas-area').append($canvas);
               }
@@ -148,8 +146,6 @@
       $('#next').on('click', function() {
           $("#save").attr('disabled', true);
           $('#canvas-area').empty()
-          $image = $('<img/>', {'id': 'image',style: "max-width:100%;"})
-          $('#canvas-area').append($image);
           $canvas = $('<canvas/>', {'id': 'canvas',style: "max-width:100%;"})
           $('#canvas-area').append($canvas);
           i++;
