@@ -144,7 +144,6 @@
       });
 
       $('#next').on('click', function() {
-          $("#save").attr('disabled', true);
           $('#canvas-area').empty()
           $canvas = $('<canvas/>', {'id': 'canvas',style: "max-width:100%;"})
           $('#canvas-area').append($canvas);
